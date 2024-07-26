@@ -1,0 +1,227 @@
+<!DOCTYPE html><html lang="CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>UDP的检验和计算 | 剥壳</title><meta name="author" content="xiaozhuz"><meta name="copyright" content="xiaozhuz"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="UDP检验和需要的信息： UDP伪首部 UDP首部 UDP的数据部分  UDP伪首部 发送方在计算检验和之前加上伪首部，检验和计算完成后去掉伪首部后再发送数据报 接收方在计算检验和之前加上伪首部 伪首部总12B,包括32位源IP地址(4B)，32位目的IP地址(4B)，0，8位协议(17)(1B)，16位UDP长度(2B)  UDP首部 UDP首部总8B，包括源端口，目的端口，长度，检验和，各2B">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UDP的检验和计算">
+<meta property="og:url" content="http://47.120.30.125/blog/2024/07/21/UDP%E7%9A%84%E6%A3%80%E9%AA%8C%E5%92%8C%E8%AE%A1%E7%AE%97/index.html">
+<meta property="og:site_name" content="剥壳">
+<meta property="og:description" content="UDP检验和需要的信息： UDP伪首部 UDP首部 UDP的数据部分  UDP伪首部 发送方在计算检验和之前加上伪首部，检验和计算完成后去掉伪首部后再发送数据报 接收方在计算检验和之前加上伪首部 伪首部总12B,包括32位源IP地址(4B)，32位目的IP地址(4B)，0，8位协议(17)(1B)，16位UDP长度(2B)  UDP首部 UDP首部总8B，包括源端口，目的端口，长度，检验和，各2B">
+<meta property="og:locale">
+<meta property="og:image" content="https://t.alcy.cc/fj">
+<meta property="article:published_time" content="2024-07-21T02:22:46.000Z">
+<meta property="article:modified_time" content="2024-07-21T02:37:25.115Z">
+<meta property="article:author" content="xiaozhuz">
+<meta property="article:tag" content="计算机网络">
+<meta property="article:tag" content="UDP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://t.alcy.cc/fj"><link rel="shortcut icon" href="/blog/img/favicon.png"><link rel="canonical" href="http://47.120.30.125/blog/2024/07/21/UDP%E7%9A%84%E6%A3%80%E9%AA%8C%E5%92%8C%E8%AE%A1%E7%AE%97/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/blog/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Error',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'UDP的检验和计算',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-07-21 10:37:25'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/blog/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/blog/archives/"><div class="headline">Articles</div><div class="length-num">9</div></a><a href="/blog/tags/"><div class="headline">Tags</div><div class="length-num">13</div></a><a href="/blog/categories/"><div class="headline">Categories</div><div class="length-num">8</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><span> 目录</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></li><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw /categories/文章/ fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清单</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/blog/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/blog/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://t.alcy.cc/fj')"><nav id="nav"><span id="blog-info"><a href="/blog/" title="剥壳"><span class="site-name">剥壳</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><span> 目录</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></li><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw /categories/文章/ fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清单</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/blog/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/blog/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">UDP的检验和计算</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2024-07-21T02:22:46.000Z" title="Created 2024-07-21 10:22:46">2024-07-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2024-07-21T02:37:25.115Z" title="Updated 2024-07-21 10:37:25">2024-07-21</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="UDP的检验和计算"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="UDP检验和需要的信息："><a href="#UDP检验和需要的信息：" class="headerlink" title="UDP检验和需要的信息："></a>UDP检验和需要的信息：</h3><ol>
+<li>UDP伪首部</li>
+<li>UDP首部</li>
+<li>UDP的数据部分</li>
+</ol>
+<h3 id="UDP伪首部"><a href="#UDP伪首部" class="headerlink" title="UDP伪首部"></a>UDP伪首部</h3><ol>
+<li>发送方在计算检验和之前加上伪首部，检验和计算完成后去掉伪首部后再发送数据报</li>
+<li>接收方在计算检验和之前加上伪首部</li>
+<li>伪首部总12B,包括32位源IP地址(4B)，32位目的IP地址(4B)，0，8位协议(17)(1B)，16位UDP长度(2B)</li>
+</ol>
+<h3 id="UDP首部"><a href="#UDP首部" class="headerlink" title="UDP首部"></a>UDP首部</h3><ol>
+<li>UDP首部总8B，包括源端口，目的端口，长度，检验和，各2B</li>
+</ol>
+<h3 id="检验和的计算"><a href="#检验和的计算" class="headerlink" title="检验和的计算"></a>检验和的计算</h3><ol>
+<li>发送端：<ol>
+<li>填充伪首部</li>
+<li>全0填充检验和字段</li>
+<li>全0填充数据部分</li>
+<li>伪首部+首部+数据部分采用二进制反码求和</li>
+<li>将和求反码填入检验和字段</li>
+<li>去掉伪首部，返送</li>
+</ol>
+</li>
+<li>接收端：<ol>
+<li>填充伪首部</li>
+<li>伪首部+首部+数据部分采用二进制反码求和</li>
+<li>结果全为1则无差错，否则丢弃数据报&#x2F;交给应用层附上出错警告</li>
+</ol>
+</li>
+<li>计算细则：<ol>
+<li>反码求和时若有高位进位，则去掉进位并加1</li>
+<li>检验和字段变化：全0 &#x3D;&gt; 检验和 &#x3D;&gt; 全1</li>
+</ol>
+</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://47.120.30.125/blog">xiaozhuz</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://47.120.30.125/blog/2024/07/21/UDP%E7%9A%84%E6%A3%80%E9%AA%8C%E5%92%8C%E8%AE%A1%E7%AE%97/">http://47.120.30.125/blog/2024/07/21/UDP%E7%9A%84%E6%A3%80%E9%AA%8C%E5%92%8C%E8%AE%A1%E7%AE%97/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">计算机网络</a><a class="post-meta__tags" href="/blog/tags/UDP/">UDP</a></div><div class="post_share"><div class="social-share" data-image="https://t.alcy.cc/fj" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/blog/2024/07/26/%E6%AD%A3%E5%90%91%E4%B8%8E%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/" title="前向与反向传播"><img class="cover" src="https://t.alcy.cc/fj" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous</div><div class="prev_info">前向与反向传播</div></div></a></div><div class="next-post pull-right"><a href="/blog/2024/07/19/Socket%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81/" title="Socket示例代码"><img class="cover" src="https://t.alcy.cc/fj" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next</div><div class="next_info">Socket示例代码</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><div><a href="/blog/2024/07/17/email%E5%8D%8F%E8%AE%AE%E5%AD%A6%E4%B9%A0/" title="email协议学习"><img class="cover" src="https://t.alcy.cc/fj" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-17</div><div class="title">email协议学习</div></div></a></div><div><a href="/blog/2024/07/19/Socket%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81/" title="Socket示例代码"><img class="cover" src="https://t.alcy.cc/fj" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-19</div><div class="title">Socket示例代码</div></div></a></div><div><a href="/blog/2024/07/19/Socket%E7%BC%96%E7%A8%8B/" title="Socket编程"><img class="cover" src="https://t.alcy.cc/fj" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-19</div><div class="title">Socket编程</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/blog/img/avatar.png" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">xiaozhuz</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/blog/archives/"><div class="headline">Articles</div><div class="length-num">9</div></a><a href="/blog/tags/"><div class="headline">Tags</div><div class="length-num">13</div></a><a href="/blog/categories/"><div class="headline">Categories</div><div class="length-num">8</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#UDP%E6%A3%80%E9%AA%8C%E5%92%8C%E9%9C%80%E8%A6%81%E7%9A%84%E4%BF%A1%E6%81%AF%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">UDP检验和需要的信息：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UDP%E4%BC%AA%E9%A6%96%E9%83%A8"><span class="toc-number">2.</span> <span class="toc-text">UDP伪首部</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UDP%E9%A6%96%E9%83%A8"><span class="toc-number">3.</span> <span class="toc-text">UDP首部</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A3%80%E9%AA%8C%E5%92%8C%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="toc-number">4.</span> <span class="toc-text">检验和的计算</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/blog/2024/07/26/%E6%AD%A3%E5%90%91%E4%B8%8E%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/" title="前向与反向传播"><img src="https://t.alcy.cc/fj" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="前向与反向传播"/></a><div class="content"><a class="title" href="/blog/2024/07/26/%E6%AD%A3%E5%90%91%E4%B8%8E%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/" title="前向与反向传播">前向与反向传播</a><time datetime="2024-07-26T02:52:09.000Z" title="Created 2024-07-26 10:52:09">2024-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2024/07/21/UDP%E7%9A%84%E6%A3%80%E9%AA%8C%E5%92%8C%E8%AE%A1%E7%AE%97/" title="UDP的检验和计算"><img src="https://t.alcy.cc/fj" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="UDP的检验和计算"/></a><div class="content"><a class="title" href="/blog/2024/07/21/UDP%E7%9A%84%E6%A3%80%E9%AA%8C%E5%92%8C%E8%AE%A1%E7%AE%97/" title="UDP的检验和计算">UDP的检验和计算</a><time datetime="2024-07-21T02:22:46.000Z" title="Created 2024-07-21 10:22:46">2024-07-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2024/07/19/Socket%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81/" title="Socket示例代码"><img src="https://t.alcy.cc/fj" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="Socket示例代码"/></a><div class="content"><a class="title" href="/blog/2024/07/19/Socket%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81/" title="Socket示例代码">Socket示例代码</a><time datetime="2024-07-19T07:49:20.000Z" title="Created 2024-07-19 15:49:20">2024-07-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2024/07/19/Socket%E7%BC%96%E7%A8%8B/" title="Socket编程"><img src="https://t.alcy.cc/fj" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="Socket编程"/></a><div class="content"><a class="title" href="/blog/2024/07/19/Socket%E7%BC%96%E7%A8%8B/" title="Socket编程">Socket编程</a><time datetime="2024-07-19T02:24:12.000Z" title="Created 2024-07-19 10:24:12">2024-07-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2024/07/18/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E7%9A%84%E7%AE%80%E8%BF%B0/" title="逻辑回归损失函数的简述"><img src="https://t.alcy.cc/fj" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="逻辑回归损失函数的简述"/></a><div class="content"><a class="title" href="/blog/2024/07/18/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E7%9A%84%E7%AE%80%E8%BF%B0/" title="逻辑回归损失函数的简述">逻辑回归损失函数的简述</a><time datetime="2024-07-18T09:20:52.000Z" title="Created 2024-07-18 17:20:52">2024-07-18</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://t.alcy.cc/fj')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By xiaozhuz</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js?v=4.13.0"></script><script src="/blog/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
