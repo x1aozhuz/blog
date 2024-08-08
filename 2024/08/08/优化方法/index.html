@@ -1,0 +1,222 @@
+<!DOCTYPE html><html lang="CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>优化方法 | 剥壳</title><meta name="author" content="xiaozhuz"><meta name="copyright" content="xiaozhuz"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="mini-batch梯度下降法什么是mini-batch梯度下降法​		原始梯度下降法是在整个训练集上进行的，输入整个训练集来算代价和梯度。当训练集非常庞大的时候，运算的速度会很慢。mini-batch将整个训练集分成若干子集，把每个子集当作一次训练集，来进行梯度下降。比如样本数为m，每一个batch大小为64，就可以分成m%64个样本 为什么这样分合理​		原始的梯度下降算法，J为代价函数$$w">
+<meta property="og:type" content="article">
+<meta property="og:title" content="优化方法">
+<meta property="og:url" content="http://47.120.30.125/blog/2024/08/08/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="剥壳">
+<meta property="og:description" content="mini-batch梯度下降法什么是mini-batch梯度下降法​		原始梯度下降法是在整个训练集上进行的，输入整个训练集来算代价和梯度。当训练集非常庞大的时候，运算的速度会很慢。mini-batch将整个训练集分成若干子集，把每个子集当作一次训练集，来进行梯度下降。比如样本数为m，每一个batch大小为64，就可以分成m%64个样本 为什么这样分合理​		原始的梯度下降算法，J为代价函数$$w">
+<meta property="og:locale">
+<meta property="og:image" content="https://t.alcy.cc/fj">
+<meta property="article:published_time" content="2024-08-08T01:18:03.000Z">
+<meta property="article:modified_time" content="2024-08-08T05:48:24.119Z">
+<meta property="article:author" content="xiaozhuz">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="吴恩达">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://t.alcy.cc/fj"><link rel="shortcut icon" href="/blog/img/favicon.png"><link rel="canonical" href="http://47.120.30.125/blog/2024/08/08/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/blog/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Error',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '优化方法',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-08-08 13:48:24'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/blog/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/blog/archives/"><div class="headline">Articles</div><div class="length-num">12</div></a><a href="/blog/tags/"><div class="headline">Tags</div><div class="length-num">15</div></a><a href="/blog/categories/"><div class="headline">Categories</div><div class="length-num">8</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><span> 目录</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></li><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw /categories/文章/ fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清单</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/blog/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/blog/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://t.alcy.cc/fj')"><nav id="nav"><span id="blog-info"><a href="/blog/" title="剥壳"><span class="site-name">剥壳</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><span> 目录</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></li><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw /categories/文章/ fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清单</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/blog/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/blog/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">优化方法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2024-08-08T01:18:03.000Z" title="Created 2024-08-08 09:18:03">2024-08-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2024-08-08T05:48:24.119Z" title="Updated 2024-08-08 13:48:24">2024-08-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blog/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="优化方法"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="mini-batch梯度下降法"><a href="#mini-batch梯度下降法" class="headerlink" title="mini-batch梯度下降法"></a>mini-batch梯度下降法</h3><h4 id="什么是mini-batch梯度下降法"><a href="#什么是mini-batch梯度下降法" class="headerlink" title="什么是mini-batch梯度下降法"></a>什么是mini-batch梯度下降法</h4><p>​		原始梯度下降法是在整个训练集上进行的，输入整个训练集来算代价和梯度。当训练集非常庞大的时候，运算的速度会很慢。mini-batch将整个训练集分成若干子集，把每个子集当作一次训练集，来进行梯度下降。比如样本数为m，每一个batch大小为64，就可以分成m%64个样本</p>
+<h4 id="为什么这样分合理"><a href="#为什么这样分合理" class="headerlink" title="为什么这样分合理"></a>为什么这样分合理</h4><p>​		原始的梯度下降算法，J为代价函数<br>$$<br>w &#x3D; w-\alpha{\partial J \over w}<br>$$<br>​		其中，$$y^{(i)}$$是真实值，$$\hat y^{(i)}$$是预测值，L是损失函数，代价函数是在所有样本上损失的和。</p>
+<p>​	<br>$$<br>J &#x3D; \sum_{i&#x3D;1}^mL(y^{(i)},\hat y ^{(i)})<br>$$<br>​		根据导数的性质，对和的求导可以转化为对导数的求和，即<br>$$<br>\frac{\partial J}{w} &#x3D; \frac{\partial J_1}{w}+\frac{\partial J_2}{w}+\frac{\partial J_3}{w}+……+\frac{\partial J_m}{w}<br>$$<br>​		使用mini-batch梯度下降算法，假设batchsize&#x3D;64，每个batch代价为<br>$$<br>J_1 &#x3D; \sum_{i&#x3D;1}^{64}L(y^{(i)},\hat y ^{(i)}),\J_2 &#x3D; \sum_{i&#x3D;1}^{64}L(y^{(i)},\hat y ^{(i)}),\J_m &#x3D; \sum_{i&#x3D;1}^{64}L(y^{(i)},\hat y ^{(i)})J_1 &#x3D; \sum_{i&#x3D;1}^{64}L(y^{(i)},\hat y ^{(i)})<br>$$<br>​		使用梯度下降：<br>$$<br>w&#x3D;w-\alpha<em>\frac{\partial J_1}{w}-\alpha</em>\frac{\partial J_2}{w}-……-\alpha*\frac{\partial J_{m&#x2F;64}}{w}<br>$$</p>
+<h4 id="比较BGD-SGD-MBGD"><a href="#比较BGD-SGD-MBGD" class="headerlink" title="比较BGD,SGD,MBGD"></a>比较BGD,SGD,MBGD</h4><p><img src="https://raw.githubusercontent.com/x1aozhuz/picbed/main/picbed/youhua1.png"></p>
+<p>​	从图中可以看出，相对于BGD，MBGD每一次的梯度下降会出现一些偏移，但是总体是下降的方向。BGD单次迭代耗时比较长。假设有数据量为100万的样本，batchsize&#x3D;100，BGD遍历一次训练集只能进行一次梯度下降，而MBGD可以做10000次</p>
+<p><img src="https://raw.githubusercontent.com/x1aozhuz/picbed/main/picbed/youhua2.png"></p>
+<p>​	</p>
+<p>​	图中蓝色的是BGD，紫色为SGD（batchsize&#x3D;1），绿色为MGD</p>
+<p>​	在pytorch中,<code>torch.utils.data.DataLoader</code>类有参数batchsize能够将数据分成mini-batch</p>
+<h4 id="指数加权平均（滑动平均）"><a href="#指数加权平均（滑动平均）" class="headerlink" title="指数加权平均（滑动平均）"></a>指数加权平均（滑动平均）</h4><p>​	指数加权平均通过给观察值不同的权重，可以让算法具有一定的记忆性，近期的数据对预测影响更大，远期的数据对预测影响更小。</p>
+<h4 id="公式"><a href="#公式" class="headerlink" title="公式"></a>公式</h4><p>$$<br>v_t &#x3D; \beta v_{t-1} + (1-\beta) \theta_t<br>$$</p>
+<p>​	变量v在t时刻为$v_t$,$\theta_t$为变量v在t时刻的取值，在不适用指数加权平均时$v_t&#x3D;\theta_t$，上式中$\beta \in [0,1)$，$\beta$是衰减权重，一般初始化设置为0.9。即第t天的预测值为前t-1天的预测值与第t天的观测值加权和。</p>
+<p>​	多次迭代相加:<br>$$<br>v_{t-3} &#x3D; \beta v_{t-4} +(1-\beta)\theta_{t-3}\<br>v_{t-2} &#x3D; \beta^2v_{t-4}+\beta(1-\beta)\theta_{t-3}+(1-\beta)\theta_{t-2}\<br>v_{t-1} &#x3D; \beta^3v_{t-4}+\beta^2(1-\beta)\theta_{t-3}+\beta(1-\beta)\theta_{t-2}+(1-\beta)\theta_{t-1}\<br>v_{t} &#x3D; \beta^4v_{t-4}+\beta^3(1-\beta)\theta_{t-3}+\beta^2(1-\beta)\theta_{t-2}+\beta(1-\beta)\theta_{t-1}+(1-\beta)\theta_t\<br>v_{100}&#x3D;(1-\beta)(\theta_{100}+\beta \theta_{99}+ \beta^2\theta_{98}+……+\beta^{99}\theta_1)<br>$$<br>​	假设$v_t$是对第t天气温的预测值，$\beta&#x3D;0.9$，则离第t天较远的时间的权重更小。<br>$$<br>令\alpha &#x3D; 1-\beta&#x3D;0.1\<br>\displaystyle\lim_{\alpha\to0}(1-\alpha)^{1\over \alpha} &#x3D; {1\over e}\approx0.37<br>$$<br>上式改写成<br>$$<br>v_{100}&#x3D;\alpha[\theta_{100}+(1-\alpha) \theta_{99}+ (1-\alpha)^2\theta_{98}+……+(1-\alpha)^{99}\theta_1)]<br>$$<br>可以将$v_{100}$近似看作前$1\over\alpha$天的平均气温。取$\beta$接近1，就可以使权重为0.37后的项忽略不计，不参与$v_{100}$的计算，这些项数为$1\over(1-\beta)$，即前$1\over(1-\beta)$的平均值，</p>
+<h4 id="偏差修正"><a href="#偏差修正" class="headerlink" title="偏差修正"></a>偏差修正</h4><p>​	使用指数加权方法我们会得到下图</p>
+<p><img src="https://raw.githubusercontent.com/x1aozhuz/picbed/main/picbed/youhua3.png"></p>
+<p>​	应用$\beta$为）0.98,我们理应得到绿线，但是实际上得到的是紫线，紫线和绿线在后半部分基本贴合，但是开始阶段中，紫线要低于绿线，因为在第一天的预测数据中，我们将观测值加权为0.02，并且没有前面的预测值。如此，我们将在计算时添加一个步骤，为每一项乘一个偏差修正系数<br>$$<br>v_t&#x3D;\frac{v_t}{1-\beta^t}<br>$$<br>在t较小时，$1-\beta$接近0,t&#x3D;1时，值为0.02。而当t较大时，这个值接近1，可以近乎忽略不计，这样就可以在开始阶段放大$v_t$</p>
+<p><img src="https://raw.githubusercontent.com/x1aozhuz/picbed/main/picbed/youhua5.png"></p>
+<h3 id="动量梯度下降法"><a href="#动量梯度下降法" class="headerlink" title="动量梯度下降法"></a>动量梯度下降法</h3><p>​	前面使用MBGD时的图提到，MBGD会导致每次梯度下降时出现一些偏移，这样每次学习的步长较小。而如果采用指数加权的方式更新参数，可以形成一种类似“动量”的学习过程，减小梯度下降时出现的偏移。</p>
+<h4 id="公式-1"><a href="#公式-1" class="headerlink" title="公式"></a>公式</h4><p>梯度下降法的参数更新公式<br>$$<br>w &#x3D; w-\alpha \nabla w\<br>b &#x3D; b-\alpha \nabla b<br>$$<br>可以看到，每次更新仅与当前梯度值相关而不涉及之前的梯度。假设在100次梯度下降中求得的梯度序列为:<br>$$<br>{\nabla w_1,\nabla w_2,\nabla w_3,……,\nabla w_{99},\nabla w_{100}}<br>$$<br>对其加权：<br>$$<br>V_{\nabla w_0} &#x3D; 0\<br>V_{\nabla w_1} &#x3D; \beta V_{\nabla w_0} +(1-\beta)\nabla w_1\<br>V_{\nabla w_2} &#x3D; \beta V_{\nabla w_1} +(1-\beta)\nabla w_2\<br>V_{\nabla w_{100}} &#x3D; \beta V_{\nabla w_{99}} +(1-\beta)\nabla w_{100}<br>$$</p>
+<h3 id="RMSprop"><a href="#RMSprop" class="headerlink" title="RMSprop"></a>RMSprop</h3><p><img src="https://raw.githubusercontent.com/x1aozhuz/picbed/main/picbed/youhua6.png" alt="image-20240808134208549"></p>
+<p>RMSprop是一种自适应学习率的优化算法，主要用于参数更新，旨在解决Adagrad算法学习率逐渐减小直至无法进一步想学习的问题。Adagrad算法通过累计历史梯度的平方来调整每个参数的学习率，实现对频繁更新参数的惩罚和对不频繁更新参数的鼓励。但是随着参数更新的累计，学习率会越来越小，导致学习过程提前结束。RMSprop通过引入一个衰减系数来解决这个问题，使历史信息能够指数级衰减。</p>
+<p>如上图，纵轴(b)方向上的学习率较高，横轴(w)上的学习率较低。动量梯度下降中加权梯度的计算公式为<br>$$<br>S_{dw} &#x3D; \beta S_{dw} + (1-\beta)(dw)^2\<br>S_{db} &#x3D; \beta S_{db} + (1-\beta)(db)^2\<br>$$<br>将梯度下降的公式改写成<br>$$<br>w&#x3D;w-\alpha \frac{dw}{\sqrt{S_{dw}}}<br>$$<br>这样当加权后的梯度较大时，学习率就会相应减小。而加权后的梯度较小时，学习率就会相增加。来让纵轴的摆动幅度减小，横轴学习加快</p>
+<h3 id="Adam优化算法"><a href="#Adam优化算法" class="headerlink" title="Adam优化算法"></a>Adam优化算法</h3><p>​	Adam算法是将Momentum和RMSprop结合在一起，同时具有惯性保持，自适应学习率、环境感知等特点的算法(缝合怪)</p>
+<p><img src="https://raw.githubusercontent.com/x1aozhuz/picbed/main/picbed/youhua8.png" alt="image-20240808134344013"></p>
+<h4 id="超参数"><a href="#超参数" class="headerlink" title="超参数"></a>超参数</h4><p>其中$\alpha$需要多次尝试来选择合适的值，$\beta_1 ,\beta_2$的值推荐为0.9和0.999</p>
+<p><img src="https://raw.githubusercontent.com/x1aozhuz/picbed/main/picbed/image-20240808134548174.png"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://47.120.30.125/blog">xiaozhuz</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://47.120.30.125/blog/2024/08/08/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/">http://47.120.30.125/blog/2024/08/08/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a><a class="post-meta__tags" href="/blog/tags/%E5%90%B4%E6%81%A9%E8%BE%BE/">吴恩达</a></div><div class="post_share"><div class="social-share" data-image="https://t.alcy.cc/fj" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/blog/2024/08/07/ctfshow-xss%E9%A2%98%E8%A7%A3/" title="ctfshow-xss题解"><img class="cover" src="https://t.alcy.cc/fj" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next</div><div class="next_info">ctfshow-xss题解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><div><a href="/blog/2024/08/04/dropout%E6%AD%A3%E5%88%99%E5%8C%96/" title="dropout正则化"><img class="cover" src="https://t.alcy.cc/fj" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-04</div><div class="title">dropout正则化</div></div></a></div><div><a href="/blog/2024/07/13/%E4%B8%80%E4%B8%AApytorch%E5%85%A5%E9%97%A8%E7%9A%84%E5%AE%9E%E4%BE%8B/" title="一个pytorch入门的实例"><img class="cover" src="https://api.dujin.org/bing/1920.php" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-13</div><div class="title">一个pytorch入门的实例</div></div></a></div><div><a href="/blog/2024/07/18/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E7%9A%84%E7%AE%80%E8%BF%B0/" title="逻辑回归损失函数的简述"><img class="cover" src="https://t.alcy.cc/fj" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-18</div><div class="title">逻辑回归损失函数的简述</div></div></a></div><div><a href="/blog/2024/07/26/%E6%AD%A3%E5%90%91%E4%B8%8E%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/" title="前向与反向传播"><img class="cover" src="https://t.alcy.cc/fj" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-26</div><div class="title">前向与反向传播</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/blog/img/avatar.png" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">xiaozhuz</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/blog/archives/"><div class="headline">Articles</div><div class="length-num">12</div></a><a href="/blog/tags/"><div class="headline">Tags</div><div class="length-num">15</div></a><a href="/blog/categories/"><div class="headline">Categories</div><div class="length-num">8</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#mini-batch%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">mini-batch梯度下降法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFmini-batch%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">什么是mini-batch梯度下降法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E6%A0%B7%E5%88%86%E5%90%88%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">为什么这样分合理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AF%94%E8%BE%83BGD-SGD-MBGD"><span class="toc-number">1.3.</span> <span class="toc-text">比较BGD,SGD,MBGD</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E6%95%B0%E5%8A%A0%E6%9D%83%E5%B9%B3%E5%9D%87%EF%BC%88%E6%BB%91%E5%8A%A8%E5%B9%B3%E5%9D%87%EF%BC%89"><span class="toc-number">1.4.</span> <span class="toc-text">指数加权平均（滑动平均）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%AC%E5%BC%8F"><span class="toc-number">1.5.</span> <span class="toc-text">公式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%81%8F%E5%B7%AE%E4%BF%AE%E6%AD%A3"><span class="toc-number">1.6.</span> <span class="toc-text">偏差修正</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A8%E9%87%8F%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">动量梯度下降法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%AC%E5%BC%8F-1"><span class="toc-number">2.1.</span> <span class="toc-text">公式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RMSprop"><span class="toc-number">3.</span> <span class="toc-text">RMSprop</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Adam%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">Adam优化算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B6%85%E5%8F%82%E6%95%B0"><span class="toc-number">4.1.</span> <span class="toc-text">超参数</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/blog/2024/08/08/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/" title="优化方法"><img src="https://t.alcy.cc/fj" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="优化方法"/></a><div class="content"><a class="title" href="/blog/2024/08/08/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/" title="优化方法">优化方法</a><time datetime="2024-08-08T01:18:03.000Z" title="Created 2024-08-08 09:18:03">2024-08-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2024/08/07/ctfshow-xss%E9%A2%98%E8%A7%A3/" title="ctfshow-xss题解"><img src="https://t.alcy.cc/fj" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="ctfshow-xss题解"/></a><div class="content"><a class="title" href="/blog/2024/08/07/ctfshow-xss%E9%A2%98%E8%A7%A3/" title="ctfshow-xss题解">ctfshow-xss题解</a><time datetime="2024-08-06T23:47:06.000Z" title="Created 2024-08-07 07:47:06">2024-08-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2024/08/04/dropout%E6%AD%A3%E5%88%99%E5%8C%96/" title="dropout正则化"><img src="https://t.alcy.cc/fj" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="dropout正则化"/></a><div class="content"><a class="title" href="/blog/2024/08/04/dropout%E6%AD%A3%E5%88%99%E5%8C%96/" title="dropout正则化">dropout正则化</a><time datetime="2024-08-04T07:34:54.000Z" title="Created 2024-08-04 15:34:54">2024-08-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2024/07/26/%E6%AD%A3%E5%90%91%E4%B8%8E%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/" title="前向与反向传播"><img src="https://t.alcy.cc/fj" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="前向与反向传播"/></a><div class="content"><a class="title" href="/blog/2024/07/26/%E6%AD%A3%E5%90%91%E4%B8%8E%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/" title="前向与反向传播">前向与反向传播</a><time datetime="2024-07-26T02:52:09.000Z" title="Created 2024-07-26 10:52:09">2024-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2024/07/21/UDP%E7%9A%84%E6%A3%80%E9%AA%8C%E5%92%8C%E8%AE%A1%E7%AE%97/" title="UDP的检验和计算"><img src="https://t.alcy.cc/fj" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="UDP的检验和计算"/></a><div class="content"><a class="title" href="/blog/2024/07/21/UDP%E7%9A%84%E6%A3%80%E9%AA%8C%E5%92%8C%E8%AE%A1%E7%AE%97/" title="UDP的检验和计算">UDP的检验和计算</a><time datetime="2024-07-21T02:22:46.000Z" title="Created 2024-07-21 10:22:46">2024-07-21</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://t.alcy.cc/fj')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By xiaozhuz</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js?v=4.13.0"></script><script src="/blog/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
